@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.1.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.0.2"></script>
+</head>
+<body>
+  <div id="vis"/>
+  <script>
+    const spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 980,
+  "height": 560,
+  "projection": {"type": "equirectangular", "center": [133, -28], "scale": 900},
+  "layer": [
+    {"data": {"sphere": true}, "mark": {"type": "geoshape", "fill": "#eaf2f9"}},
+    {
+      "data": {"graticule": {"step": [30, 30]}},
+      "mark": {
+        "type": "geoshape",
+        "stroke": "#bcd2e8",
+        "strokeWidth": 0.6,
+        "opacity": 0.9
+      }
+    },
+    {
+      "data": {
+        "url": "https://gist.githubusercontent.com/xdin0019/e6b62e92ff7dd8841bcadd1bee8b3770/raw/47defdda8841141e17fb70f1bb299d6d0e5d77e1/aus_states_simplified.json",
+        "format": {
+          "type": "topojson",
+          "feature": "aus_states_simplified.topojson"
+        }
+      },
+      "transform": [
+        {
+          "lookup": "properties.name",
+          "from": {
+            "data": {
+              "url": "https://gist.githubusercontent.com/xdin0019/e6b62e92ff7dd8841bcadd1bee8b3770/raw/47defdda8841141e17fb70f1bb299d6d0e5d77e1/state_he_enrol_rate.csv"
+            },
+            "key": "state",
+            "fields": ["state", "year", "he_students", "pop15_24"]
+          }
+        },
+        {
+          "calculate": "toNumber(datum.he_students) / toNumber(datum.pop15_24)",
+          "as": "he_enrol_rate"
+        }
+      ],
+      "mark": {"type": "geoshape", "stroke": "#d9d9d9", "strokeWidth": 0.6},
+      "encoding": {
+        "color": {
+          "field": "he_enrol_rate",
+          "type": "quantitative",
+          "title": "University enrolment rate (15–24)",
+          "legend": {"format": ".0%"},
+          "scale": {"scheme": "greens"}
+        },
+        "tooltip": [
+          {"field": "properties.name", "title": "State/Territory"},
+          {
+            "field": "he_enrol_rate",
+            "title": "Enrolment rate",
+            "format": ".1%"
+          },
+          {
+            "field": "he_students",
+            "title": "Higher education students",
+            "format": ","
+          },
+          {"field": "pop15_24", "title": "Age 15–24 population", "format": ","},
+          {"field": "year", "title": "Year"}
+        ]
+      }
+    }
+  ],
+  "title": {
+    "text": "What Are People Our Age Doing? — University Enrolment Rate (15–24)",
+    "fontSize": 18,
+    "anchor": "start"
+  },
+  "config": {}
+};
+    vegaEmbed("#vis", spec, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+  </script>
+</body>
+</html>
